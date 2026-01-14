@@ -1,6 +1,6 @@
 # Anti-Class Bunking System 🛡️
 
-A premium, real-time surveillance and attendance management system powered by Face Recognition and AI. Designed to monitor student presence across multiple locations (Classroom & Corridors) and alert authorities in case of unauthorized absence. (!!This is a completely a prototype model which uses 2 camera's which are laptop 'default camera' and an external webcamera to act as second camera
+A premium, real-time surveillance and attendance management system powered by Face Recognition and AI. Designed to monitor student presence across multiple locations (Classroom & Corridors) and alert authorities in case of unauthorized absence. (!!This is a completely a prototype model which uses 2 camera's which are laptop 'default camera' and an external webcamera to act as second camera!!)
 
 ![Dashboard Preview](https://via.placeholder.com/800x400?text=Anti-Class+Bunking+System+Dashboard)
 
