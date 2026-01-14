@@ -1,0 +1,188 @@
+{% extends 'core/base.html' %}
+
+{% block content %}
+<div class="dashboard">
+    <!-- Left Column: Live Feed -->
+    <div class="video-section card">
+        <div class="card-header">
+            <h2><i class="fa-solid fa-video"></i> Live Surveillance</h2>
+            <span class="live-indicator">LIVE</span>
+        </div>
+        <div class="video-container">
+            <img src="{% url 'video_feed' %}" alt="Video Feed" class="video-feed">
+        </div>
+        <div class="video-stats">
+            <div class="stat-item">
+                <span class="stat-label">Status</span>
+                <span class="stat-value">Active</span>
+            </div>
+            <div class="stat-item">
+                <span class="stat-label">Model</span>
+                <span class="stat-value">HOG (Fast)</span>
+            </div>
+            <div class="stat-item">
+                <span class="stat-label">Tolerance</span>
+                <span class="stat-value">0.6</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- Right Column: Registration -->
+    <div class="controls-section card">
+        <div class="card-header">
+            <h2><i class="fa-solid fa-user-plus"></i> Register New Face</h2>
+        </div>
+
+        <div class="tabs">
+            <button class="tab-btn active" onclick="switchTab('upload')"><i class="fa-solid fa-upload"></i>
+                Upload</button>
+            <button class="tab-btn" onclick="switchTab('capture')"><i class="fa-solid fa-camera"></i> Capture</button>
+        </div>
+
+        <!-- Upload Form -->
+        <div id="upload-tab" class="tab-content active">
+            <form method="post" enctype="multipart/form-data" class="upload-form">
+                {% csrf_token %}
+                <div class="form-group">
+                    <label for="name-upload">Full Name</label>
+                    <div class="input-icon">
+                        <i class="fa-solid fa-user"></i>
+                        <input type="text" name="name" id="name-upload" required placeholder="e.g. John Doe">
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label for="image">Photo File</label>
+                    <div class="file-drop-area">
+                        <i class="fa-solid fa-cloud-arrow-up"></i>
+                        <span class="file-msg">Choose a file or drag it here</span>
+                        <input type="file" name="image" id="image" accept="image/*" required class="file-input">
+                    </div>
+                </div>
+                <button type="submit" class="btn-primary">
+                    <i class="fa-solid fa-check"></i> Register User
+                </button>
+            </form>
+        </div>
+
+        <!-- Capture Form -->
+        <div id="capture-tab" class="tab-content">
+            <div class="capture-container">
+                <video id="webcam-preview" autoplay playsinline></video>
+                <canvas id="capture-canvas" style="display:none;"></canvas>
+                <img id="captured-image" style="display:none;" alt="Captured">
+            </div>
+
+            <div class="capture-controls">
+                <button type="button" id="start-camera-btn" class="btn-secondary" onclick="startCamera()">
+                    <i class="fa-solid fa-power-off"></i> Start Camera
+                </button>
+                <button type="button" id="capture-btn" class="btn-primary" onclick="capturePhoto()"
+                    style="display:none;">
+                    <i class="fa-solid fa-camera"></i> Take Photo
+                </button>
+                <button type="button" id="retake-btn" class="btn-secondary" onclick="retakePhoto()"
+                    style="display:none;">
+                    <i class="fa-solid fa-rotate-left"></i> Retake
+                </button>
+            </div>
+
+            <form method="post" id="capture-form" style="display:none;">
+                {% csrf_token %}
+                <div class="form-group">
+                    <label for="name-capture">Full Name</label>
+                    <div class="input-icon">
+                        <i class="fa-solid fa-user"></i>
+                        <input type="text" name="name" id="name-capture" required placeholder="e.g. Jane Doe">
+                    </div>
+                </div>
+                <input type="hidden" name="image_data" id="image-data">
+                <button type="submit" class="btn-primary">
+                    <i class="fa-solid fa-check"></i> Register Captured Face
+                </button>
+            </form>
+        </div>
+
+        <div class="instructions">
+            <h3><i class="fa-solid fa-circle-info"></i> Guide</h3>
+            <p>1. Enter the person's name.</p>
+            <p>2. Upload a clear photo OR capture one using the webcam.</p>
+            <p>3. The system will learn the face instantly.</p>
+        </div>
+    </div>
+</div>
+
+<script>
+    function switchTab(tabName) {
+        document.querySelectorAll('.tab-content').forEach(el => el.classList.remove('active'));
+        document.querySelectorAll('.tab-btn').forEach(el => el.classList.remove('active'));
+
+        document.getElementById(tabName + '-tab').classList.add('active');
+        document.querySelector(`button[onclick="switchTab('${tabName}')"]`).classList.add('active');
+
+        if (tabName === 'capture') {
+            // Optional: Auto-start camera? Maybe better to let user click start.
+        } else {
+            stopCamera();
+        }
+    }
+
+    let stream = null;
+
+    async function startCamera() {
+        try {
+            stream = await navigator.mediaDevices.getUserMedia({ video: true });
+            const video = document.getElementById('webcam-preview');
+            video.srcObject = stream;
+            video.style.display = 'block';
+            document.getElementById('captured-image').style.display = 'none';
+
+            document.getElementById('start-camera-btn').style.display = 'none';
+            document.getElementById('capture-btn').style.display = 'block';
+            document.getElementById('retake-btn').style.display = 'none';
+            document.getElementById('capture-form').style.display = 'none';
+        } catch (err) {
+            console.error("Error accessing webcam:", err);
+            alert("Could not access webcam. Please allow permissions.");
+        }
+    }
+
+    function stopCamera() {
+        if (stream) {
+            stream.getTracks().forEach(track => track.stop());
+            stream = null;
+            document.getElementById('webcam-preview').srcObject = null;
+            document.getElementById('start-camera-btn').style.display = 'block';
+            document.getElementById('capture-btn').style.display = 'none';
+        }
+    }
+
+    function capturePhoto() {
+        const video = document.getElementById('webcam-preview');
+        const canvas = document.getElementById('capture-canvas');
+        const img = document.getElementById('captured-image');
+
+        canvas.width = video.videoWidth;
+        canvas.height = video.videoHeight;
+        canvas.getContext('2d').drawImage(video, 0, 0);
+
+        const dataURL = canvas.toDataURL('image/jpeg');
+        img.src = dataURL;
+        document.getElementById('image-data').value = dataURL;
+
+        video.style.display = 'none';
+        img.style.display = 'block';
+
+        document.getElementById('capture-btn').style.display = 'none';
+        document.getElementById('retake-btn').style.display = 'block';
+        document.getElementById('capture-form').style.display = 'block';
+    }
+
+    function retakePhoto() {
+        document.getElementById('webcam-preview').style.display = 'block';
+        document.getElementById('captured-image').style.display = 'none';
+        document.getElementById('capture-btn').style.display = 'block';
+        document.getElementById('retake-btn').style.display = 'none';
+        document.getElementById('capture-form').style.display = 'none';
+    }
+</script>
+{% endblock %}

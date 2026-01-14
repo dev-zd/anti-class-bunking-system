@@ -1,0 +1,342 @@
+{% extends 'core/base.html' %}
+{% load static %}
+
+{% block content %}
+<div class="container" style="padding-top: 100px; padding-bottom: 40px;">
+
+    <!-- Header -->
+    <div class="flex items-center justify-between" style="margin-bottom: 2rem;">
+        <h1 style="font-size: 2.5rem; font-weight: 700; margin: 0;">
+            Security <span style="color: var(--primary);">Dashboard</span>
+        </h1>
+        <div style="color: var(--text-muted); font-size: 0.9rem;">
+            <i class="fa-solid fa-calendar-day"></i> {{ today|date:"l, M d, Y" }}
+        </div>
+    </div>
+
+    <!-- Quick Stats Grid -->
+    <div class="dashboard-grid">
+        <div class="glass-card stat-card">
+            <div class="stat-icon stat-icon-blue">
+                <i class="fa-solid fa-users"></i>
+            </div>
+            <div class="stat-content">
+                <span class="stat-label">Total Students</span>
+                <span class="stat-value">{{ total_students }}</span>
+            </div>
+        </div>
+
+        <div class="glass-card stat-card">
+            <div class="stat-icon stat-icon-green">
+                <i class="fa-solid fa-user-check"></i>
+            </div>
+            <div class="stat-content">
+                <span class="stat-label">Present Today</span>
+                <span class="stat-value">{{ present_today }}</span>
+            </div>
+        </div>
+
+        <div class="glass-card stat-card">
+            <div class="stat-icon stat-icon-red">
+                <i class="fa-solid fa-triangle-exclamation"></i>
+            </div>
+            <div class="stat-content">
+                <span class="stat-label">Security Alerts</span>
+                <span class="stat-value">{{ alerts_today }}</span>
+            </div>
+        </div>
+
+        <div class="glass-card stat-card">
+            <div class="stat-icon stat-icon-orange">
+                <i class="fa-solid fa-camera"></i>
+            </div>
+            <div class="stat-content">
+                <span class="stat-label">Status</span>
+                <span class="stat-value stat-value-active">Active</span>
+            </div>
+        </div>
+    </div>
+
+
+    <!-- Charts & Recent Activity -->
+    <div class="dashboard-flex-row" style="margin-top: 2rem;">
+        <!-- Attendance Trend -->
+        <div class="glass-card chart-container">
+            <h3 class="card-title">Attendance & Security Trends</h3>
+            <canvas id="trendsChart"></canvas>
+        </div>
+
+        <!-- Recent Logs -->
+        <div class="glass-card activity-container">
+            <h3 class="card-title">Recent Activity</h3>
+            <div class="activity-feed">
+                {% if recent_logs %}
+                {% for log in recent_logs %}
+                <div class="activity-item">
+                    <div class="activity-dot status-{{ log.status|lower }}"></div>
+                    <div class="activity-info">
+                        <span class="activity-name">{{ log.name }}</span>
+                        <span class="activity-desc">{{ log.status }} in {{ log.location }}</span>
+                        <span class="activity-time">{{ log.timestamp|timesince }} ago</span>
+                    </div>
+                </div>
+                {% endfor %}
+                {% else %}
+                <div class="empty-state">
+                    <p>No recent activity</p>
+                </div>
+                {% endif %}
+            </div>
+            <a href="{% url 'report' %}" class="btn-secondary dashboard-view-all">View Full Report</a>
+        </div>
+    </div>
+
+</div>
+
+<!-- Pass data to JS via hidden elements to avoid linter errors -->
+<div id="dashboard-data" data-days="{{ chart_days|safe }}" data-attendance="{{ attendance_data|safe }}"
+    data-alerts="{{ alerts_data|safe }}" style="display: none;">
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        const dataEl = document.getElementById('dashboard-data');
+        const days = JSON.parse(dataEl.getAttribute('data-days').replace(/'/g, '"'));
+        const attendance = JSON.parse(dataEl.getAttribute('data-attendance'));
+        const alerts = JSON.parse(dataEl.getAttribute('data-alerts'));
+
+        const ctx = document.getElementById('trendsChart').getContext('2d');
+        new Chart(ctx, {
+            type: 'line',
+            data: {
+                labels: days,
+                datasets: [
+                    {
+                        label: 'Attendance',
+                        data: attendance,
+                        borderColor: '#10b981',
+                        backgroundColor: 'rgba(16, 185, 129, 0.1)',
+                        fill: true,
+                        tension: 0.4
+                    },
+                    {
+                        label: 'Security Alerts',
+                        data: alerts,
+                        borderColor: '#ef4444',
+                        backgroundColor: 'rgba(239, 68, 68, 0.1)',
+                        fill: true,
+                        tension: 0.4
+                    }
+                ]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: {
+                        labels: { color: '#ffffff', font: { family: 'Outfit' } }
+                    }
+                },
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        grid: { color: 'rgba(255, 255, 255, 0.05)' },
+                        ticks: { color: '#888888', font: { family: 'Outfit' } }
+                    },
+                    x: {
+                        grid: { display: false },
+                        ticks: { color: '#888888', font: { family: 'Outfit' } }
+                    }
+                }
+            }
+        });
+
+    });
+</script>
+
+<style>
+    .dashboard-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+        gap: 1.5rem;
+    }
+
+    .stat-card {
+        padding: 1.5rem;
+        display: flex;
+        align-items: center;
+        gap: 1.2rem;
+        transition: transform 0.3s ease;
+    }
+
+    .stat-card:hover {
+        transform: translateY(-5px);
+    }
+
+    .stat-icon {
+        width: 56px;
+        height: 56px;
+        border-radius: 14px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.4rem;
+    }
+
+    .stat-icon-blue {
+        background: rgba(59, 130, 246, 0.15);
+        color: #3b82f6;
+    }
+
+    .stat-icon-green {
+        background: rgba(16, 185, 129, 0.15);
+        color: #10b981;
+    }
+
+    .stat-icon-red {
+        background: rgba(239, 68, 68, 0.15);
+        color: #ef4444;
+    }
+
+    .stat-icon-orange {
+        background: rgba(245, 158, 11, 0.15);
+        color: #f59e0b;
+    }
+
+    .stat-content {
+        display: flex;
+        flex-direction: column;
+    }
+
+    .stat-label {
+        font-size: 0.8rem;
+        color: var(--text-muted);
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+        margin-bottom: 2px;
+    }
+
+    .stat-value {
+        font-size: 1.6rem;
+        font-weight: 700;
+        color: var(--text-main);
+        line-height: 1.2;
+    }
+
+    .stat-value-active {
+        color: #10b981;
+        font-size: 1.2rem;
+        margin-top: 4px;
+    }
+
+    .dashboard-flex-row {
+        display: flex;
+        gap: 1.5rem;
+        flex-wrap: wrap;
+    }
+
+    .chart-container {
+        flex: 2;
+        padding: 1.5rem;
+        min-width: 300px;
+        min-height: 400px;
+    }
+
+    .activity-container {
+        flex: 1;
+        padding: 1.5rem;
+        min-width: 280px;
+        display: flex;
+        flex-direction: column;
+    }
+
+    .card-title {
+        margin: 0 0 1.5rem 0;
+        font-size: 1.1rem;
+        font-weight: 600;
+    }
+
+    .activity-feed {
+        display: flex;
+        flex-direction: column;
+        gap: 1.2rem;
+        flex: 1;
+    }
+
+    .activity-item {
+        display: flex;
+        gap: 1rem;
+    }
+
+    .activity-dot {
+        width: 10px;
+        height: 10px;
+        border-radius: 50%;
+        margin-top: 6px;
+        flex-shrink: 0;
+    }
+
+    .status-missing {
+        background: #ef4444;
+        box-shadow: 0 0 8px rgba(239, 68, 68, 0.4);
+    }
+
+    .status-found {
+        background: #10b981;
+        box-shadow: 0 0 8px rgba(16, 185, 129, 0.4);
+    }
+
+    .activity-info {
+        display: flex;
+        flex-direction: column;
+        gap: 2px;
+    }
+
+    .activity-name {
+        font-weight: 600;
+        font-size: 0.95rem;
+        color: var(--text-main);
+    }
+
+    .activity-desc {
+        font-size: 0.85rem;
+        color: var(--text-muted);
+    }
+
+    .activity-time {
+        font-size: 0.75rem;
+        color: var(--primary);
+        margin-top: 2px;
+    }
+
+    .empty-state {
+        text-align: center;
+        padding: 3rem 0;
+        color: var(--text-muted);
+    }
+
+    .dashboard-view-all {
+        width: 100%;
+        text-align: center;
+        margin-top: 1.5rem;
+        display: block;
+        text-decoration: none;
+    }
+
+    #trendsChart {
+        width: 100% !important;
+        height: 320px !important;
+    }
+
+    @media (max-width: 992px) {
+        .chart-container {
+            flex: 1 1 100%;
+        }
+
+        .activity-container {
+            flex: 1 1 100%;
+        }
+    }
+</style>
+{% endblock %}

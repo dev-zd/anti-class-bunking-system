@@ -1,0 +1,5 @@
+django
+opencv-python
+face_recognition
+numpy
+mysqlclient

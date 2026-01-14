@@ -1,0 +1,163 @@
+{% extends 'core/base.html' %}
+
+{% block content %}
+<div class="container animate-fade-in" style="margin-top: 100px; padding-bottom: 4rem;">
+    <div style="max-width: 800px; margin: 0 auto;">
+
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 3rem;">
+            <div>
+                <h1 style="font-size: 2.5rem; margin-bottom: 0.5rem;">Edit Student Profile</h1>
+                <p style="color: var(--text-muted); font-size: 1.1rem;">Update details or add new training photos for
+                    <strong>{{ person.name }}</strong>.</p>
+            </div>
+            <a href="{% url 'gallery' %}" class="btn-secondary" style="text-decoration: none;">
+                <i class="fa-solid fa-arrow-left"></i> Back to Gallery
+            </a>
+        </div>
+
+        <div class="glass-card" style="margin-bottom: 2rem;">
+            <div style="padding: 2.5rem;">
+                <h3 style="margin-bottom: 1.5rem; display: flex; align-items: center; gap: 0.5rem;">
+                    <i class="fa-solid fa-user-pen" style="color: var(--primary);"></i>
+                    Basic Information
+                </h3>
+
+                <form method="post" enctype="multipart/form-data" id="edit-form">
+                    {% csrf_token %}
+                    <div class="form-group">
+                        <label for="name">Full Name</label>
+                        <input type="text" name="name" id="name" required value="{{ person.name }}" class="form-input">
+                    </div>
+
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem;">
+                        <div class="form-group">
+                            <label for="class_name">Class</label>
+                            <select name="class_name" id="class_name" class="form-input">
+                                <option value="" disabled>Select Class</option>
+                                {% for cls in class_options %}
+                                <option value="{{ cls }}" {% if person.class_name  ==  cls %}selected{% endif %}>{{ cls }}
+                                </option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label for="age">Age</label>
+                            <input type="number" name="age" id="age" value="{{ person.age|default:'' }}"
+                                class="form-input">
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="department">Department</label>
+                        <select name="department" id="department" class="form-input">
+                            <option value="" {% if not person.department %}selected{% endif %}>No Department</option>
+                            {% for dept in departments %}
+                            <option value="{{ dept.id }}" {% if person.department.id  ==  dept.id %}selected{% endif %}>{{ dept.name }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+
+                    <div
+                        style="margin: 2rem 0; padding: 1.5rem; background: rgba(99, 102, 241, 0.05); border-radius: 12px; border: 1px dashed rgba(99, 102, 241, 0.3);">
+                        <h4 style="margin-bottom: 1rem; color: var(--primary);">
+                            <i class="fa-solid fa-cloud-arrow-up"></i> Upload New Photos
+                        </h4>
+                        <p style="color: var(--text-muted); font-size: 0.9rem; margin-bottom: 1rem;">
+                            Add more photos to improve recognition accuracy. Existing photos will be preserved.
+                        </p>
+                        <input type="file" name="image" id="image-upload" accept="image/*" multiple class="form-input"
+                            style="padding: 0.5rem;">
+                    </div>
+
+                    <button type="submit" class="btn-primary" style="width: 100%; padding: 1rem; font-size: 1rem;">
+                        <i class="fa-solid fa-floppy-disk"></i> Save Changes
+                    </button>
+                </form>
+            </div>
+        </div>
+
+        <div class="glass-card">
+            <div style="padding: 2.5rem;">
+                <h3 style="margin-bottom: 1.5rem; display: flex; align-items: center; gap: 0.5rem;">
+                    <i class="fa-solid fa-images" style="color: var(--secondary);"></i>
+                    Training Photos ({{ person.images.count }})
+                </h3>
+
+                <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(120px, 1fr)); gap: 1rem;">
+                    {% for img in person.images.all %}
+                    <div
+                        style="position: relative; aspect-ratio: 1; border-radius: 8px; overflow: hidden; border: 1px solid rgba(255,255,255,0.1);">
+                        <img src="{{ img.image.url }}" style="width: 100%; height: 100%; object-fit: cover;">
+                        <form action="{% url 'delete_face' img.id %}" method="post"
+                            style="position: absolute; top: 5px; right: 5px;">
+                            {% csrf_token %}
+                            <button type="submit"
+                                style="background: rgba(220, 38, 38, 0.8); border: none; color: white; border-radius: 4px; padding: 4px 6px; cursor: pointer; font-size: 0.7rem;"
+                                title="Remove Photo">
+                                <i class="fa-solid fa-trash"></i>
+                            </button>
+                        </form>
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    .form-group {
+        margin-bottom: 1.5rem;
+    }
+
+    label {
+        display: block;
+        margin-bottom: 0.5rem;
+        color: var(--text-muted);
+        font-weight: 500;
+        font-size: 0.9rem;
+    }
+
+    .form-input {
+        width: 100%;
+        padding: 0.85rem 1rem;
+        background: #000000 !important;
+        /* Pure black background for dropdown bar */
+        border: 1px solid rgba(255, 255, 255, 0.3);
+        border-radius: 12px;
+        color: #ffffff !important;
+        font-size: 1rem;
+        transition: all 0.3s;
+        cursor: pointer;
+    }
+
+    select.form-input {
+        background-color: #000000 !important;
+        color: #ffffff !important;
+        appearance: none;
+        -webkit-appearance: none;
+        background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' stroke='white'%3E%3Cpath stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M19 9l-7 7-7-7'%3E%3C/path%3E%3C/svg%3E");
+        background-repeat: no-repeat;
+        background-position: right 1rem center;
+        background-size: 1.25rem;
+    }
+
+    .form-input:focus {
+        outline: none;
+        border-color: var(--primary);
+        box-shadow: 0 0 0 4px rgba(99, 102, 241, 0.2);
+    }
+
+    .form-input option {
+        background-color: #000000 !important;
+        color: #ffffff !important;
+    }
+
+    .glass-card {
+        background: rgba(255, 255, 255, 0.03);
+        backdrop-filter: blur(12px);
+        border: 1px solid rgba(255, 255, 255, 0.08);
+        border-radius: 20px;
+    }
+</style>
+{% endblock %}

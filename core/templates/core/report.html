@@ -1,0 +1,108 @@
+{% extends 'core/base.html' %}
+{% load static %}
+
+{% block content %}
+<div class="container" style="padding-top: 100px; padding-bottom: 40px;">
+    <div class="glass-card" style="padding: 2rem;">
+
+        <div class="flex items-center justify-between" style="margin-bottom: 2rem;">
+            <h1 style="font-size: 2rem; display: flex; align-items: center; gap: 1rem;">
+                <i class="fa-solid fa-triangle-exclamation" style="color: var(--danger);"></i> Bunk / Missing Reports
+            </h1>
+            <button onclick="location.reload()" class="btn-secondary" style="font-size: 0.9rem;">
+                <i class="fa-solid fa-rotate-right"></i> Refresh
+            </button>
+        </div>
+
+        {% if logs %}
+        <div style="overflow-x: auto;">
+            <table class="report-table">
+                <thead>
+                    <tr>
+                        <th>Student Name</th>
+                        <th>Date</th>
+                        <th>Time</th>
+                        <th>Location</th>
+                        <th>Status</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for log in logs %}
+                    <tr>
+                        <td style="font-weight: 500;">{{ log.name }}</td>
+                        <td>{{ log.timestamp|date:"M d, Y" }}</td>
+                        <td style="font-family: monospace;">{{ log.timestamp|time:"H:i:s" }}</td>
+                        <td>{{ log.location }}</td>
+                        <td>
+                            {% if "found" in log.status.lower %}
+                            <span class="status-badge"
+                                style="background: rgba(16, 185, 129, 0.1); border-color: rgba(16, 185, 129, 0.2); color: var(--success);">
+                                <i class="fa-solid fa-person-walking-arrow-right"></i> {{ log.status }}
+                            </span>
+                            {% else %}
+                            <span class="status-badge"
+                                style="background: rgba(239, 68, 68, 0.1); border-color: rgba(239, 68, 68, 0.2); color: var(--danger);">
+                                <i class="fa-solid fa-circle-exclamation"></i> {{ log.status }}
+                            </span>
+                            {% endif %}
+                        </td>
+                        <td>
+                            <form action="{% url 'delete_log' log.id %}" method="POST" style="display:inline;"
+                                onsubmit="return confirm('Are you sure you want to delete this log?');">
+                                {% csrf_token %}
+                                <button type="submit" class="btn-icon"
+                                    style="color: var(--danger); background: none; border: none; cursor: pointer;">
+                                    <i class="fa-solid fa-trash"></i>
+                                </button>
+                            </form>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        {% else %}
+        <div style="text-align: center; padding: 4rem 0; color: var(--text-muted);">
+            <div style="font-size: 3rem; margin-bottom: 1rem; opacity: 0.3;"><i class="fa-solid fa-clipboard-check"></i>
+            </div>
+            <p style="font-size: 1.2rem; margin-bottom: 0.5rem;">No missing reports found.</p>
+            <p style="font-size: 0.9rem;">Great! Everyone is attending class.</p>
+        </div>
+        {% endif %}
+
+    </div>
+</div>
+
+<style>
+    .report-table {
+        width: 100%;
+        border-collapse: collapse;
+        text-align: left;
+    }
+
+    .report-table th {
+        padding: 1rem;
+        color: var(--text-muted);
+        font-weight: 600;
+        text-transform: uppercase;
+        font-size: 0.85rem;
+        letter-spacing: 0.05em;
+        border-bottom: 1px solid var(--glass-border);
+    }
+
+    .report-table td {
+        padding: 1rem;
+        color: var(--text-main);
+        border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+    }
+
+    .report-table tr:last-child td {
+        border-bottom: none;
+    }
+
+    .report-table tr:hover td {
+        background-color: rgba(255, 255, 255, 0.02);
+    }
+</style>
+{% endblock %}

@@ -1,0 +1,116 @@
+{% extends 'core/base.html' %}
+
+{% block content %}
+<div class="container animate-fade-in" style="margin-top: 100px; padding-bottom: 4rem;">
+    <div style="max-width: 700px; margin: 0 auto;">
+        <div style="text-align: center; margin-bottom: 3rem;">
+            <h1 style="font-size: 2.5rem; margin-bottom: 1rem;">Register New Identity</h1>
+            <p style="color: var(--text-muted); font-size: 1.1rem;">Securely add new individuals to the facial
+                recognition database.</p>
+        </div>
+
+        <div class="glass-card">
+            <div style="padding: 2.5rem;">
+                <!-- Upload Form (Now the only option) -->
+                <div id="upload-tab" class="tab-content active" style="padding: 0;">
+                    <div style="text-align: center; margin-bottom: 2rem;">
+                        <i class="fa-solid fa-images"
+                            style="font-size: 3rem; color: var(--primary); opacity: 0.5; margin-bottom: 1rem; display: block;"></i>
+                        <p style="color: var(--text-muted); font-size: 0.9rem;">
+                            Select <strong>at least 5 photos</strong> of the student from different angles.
+                        </p>
+                    </div>
+
+                    <form method="post" enctype="multipart/form-data" id="upload-form">
+                        {% csrf_token %}
+                        <div class="form-group">
+                            <label for="name-upload">Full Name</label>
+                            <input type="text" name="name" id="name-upload" required placeholder="e.g. Jane Doe"
+                                class="form-input">
+                        </div>
+
+                        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem;">
+                            <div class="form-group">
+                                <label for="class-upload">Class</label>
+                                <select name="class_name" id="class-upload" class="form-input" required>
+                                    <option value="" disabled selected>Select Class</option>
+                                    {% for cls in class_options %}
+                                    <option value="{{ cls }}">{{ cls }}</option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label for="age-upload">Age</label>
+                                <input type="number" name="age" id="age-upload" placeholder="e.g. 15"
+                                    class="form-input">
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="dept-upload">Department</label>
+                            <select name="department" id="dept-upload" class="form-input" required>
+                                <option value="" disabled selected>Select Department</option>
+                                {% for dept in departments %}
+                                <option value="{{ dept.id }}">{{ dept.name }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="image-upload">Select Photos (Min 5)</label>
+                            <input type="file" name="image" id="image-upload" required accept="image/*" multiple
+                                class="form-input" style="padding: 0.5rem;" onchange="validateFileUpload()">
+                            <small id="file-count-msg"
+                                style="color: var(--text-muted); display: block; margin-top: 0.25rem;">
+                                No files selected.
+                            </small>
+                        </div>
+
+                        <button type="submit" id="register-btn-upload" class="btn-primary"
+                            style="width: 100%; margin-top: 1rem;" disabled>
+                            <span id="btn-text"><i class="fa-solid fa-cloud-arrow-up"></i> Upload and Register</span>
+                            <span id="btn-loader" style="display: none;"><i
+                                    class="fa-solid fa-circle-notch fa-spin"></i> Processing Encodings...</span>
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    function validateFileUpload() {
+        const input = document.getElementById('image-upload');
+        const msg = document.getElementById('file-count-msg');
+        const btn = document.getElementById('register-btn-upload');
+        const count = input.files.length;
+
+        if (count === 0) {
+            msg.innerText = "No files selected.";
+            msg.style.color = "var(--text-muted)";
+            btn.disabled = true;
+        } else if (count < 5) {
+            msg.innerText = `Only ${count} files selected. Minimum 5 required.`;
+            msg.style.color = "var(--danger)";
+            btn.disabled = true;
+        } else {
+            msg.innerText = `${count} files selected. Ready to register!`;
+            msg.style.color = "var(--accent)";
+            btn.disabled = false;
+        }
+    }
+
+    document.getElementById('upload-form').addEventListener('submit', function () {
+        const btn = document.getElementById('register-btn-upload');
+        const text = document.getElementById('btn-text');
+        const loader = document.getElementById('btn-loader');
+
+        btn.disabled = true;
+        btn.style.opacity = '0.7';
+        btn.style.cursor = 'not-allowed';
+        text.style.display = 'none';
+        loader.style.display = 'inline-block';
+    });
+</script>
+{% endblock %}

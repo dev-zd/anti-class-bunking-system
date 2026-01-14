@@ -1,0 +1,140 @@
+{% extends 'core/base.html' %}
+
+{% block content %}
+<!-- Hero Section -->
+<section class="hero-section">
+    <div class="hero-blobs">
+        <div class="hero-blob hero-blob-1"></div>
+        <div class="hero-blob hero-blob-2"></div>
+    </div>
+
+    <div class="hero-glass-container animate-fade-in">
+        <h1 class="display-text">Where Technology<br>Meets Security</h1>
+        <p class="hero-subtext">Expertly crafting breathable security environments with advanced facial recognition
+            technology.</p>
+
+        <div style="display: flex; gap: 1.5rem; justify-content: center; position: relative; z-index: 10;">
+            <a href="{% url 'scan' %}" class="btn-primary glow-btn"
+                style="padding: 1rem 2.5rem; font-size: 1.1rem; border-radius: 50px;">
+                Start Analysis
+            </a>
+            <a href="#features" class="btn-secondary hover-glow"
+                style="padding: 1rem 2.5rem; font-size: 1.1rem; border-radius: 50px; background: rgba(255,255,255,0.05); backdrop-filter: blur(10px);">
+                Explore Features
+            </a>
+        </div>
+    </div>
+</section>
+
+<!-- Features / Dashboard Actions -->
+<section id="features" class="feature-section container">
+    <h2 class="section-title">Core Capabilities</h2>
+
+    <div class="grid" style="grid-template-columns: repeat(auto-fit, minmax(350px, 1fr)); gap: 2rem;">
+
+        <!-- Register Card -->
+        <a href="{% url 'register' %}" class="glass-card animate-fade-in"
+            style="padding: 3rem 2rem; text-decoration: none; text-align: center; transition: all 0.4s ease; animation-delay: 0.1s;">
+            <div
+                style="width: 80px; height: 80px; background: rgba(99, 102, 241, 0.1); border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 1.5rem; color: var(--primary); font-size: 2rem;">
+                <i class="fa-solid fa-user-plus"></i>
+            </div>
+            <h3 style="font-size: 1.5rem; margin-bottom: 1rem;">Registration</h3>
+            <p style="color: var(--text-muted); margin-bottom: 2rem;">Seamlessly onboard new individuals into the secure
+                database using webcam or file uploads.</p>
+            <span style="color: var(--primary); font-weight: 600;">Get Started &rarr;</span>
+        </a>
+
+        <!-- Live Analysis Card -->
+        <a href="{% url 'scan' %}" class="glass-card animate-fade-in"
+            style="padding: 3rem 2rem; text-decoration: none; text-align: center; transition: all 0.4s ease; animation-delay: 0.2s;">
+            <div
+                style="width: 80px; height: 80px; background: rgba(236, 72, 153, 0.1); border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 1.5rem; color: var(--secondary); font-size: 2rem;">
+                <i class="fa-solid fa-expand"></i>
+            </div>
+            <h3 style="font-size: 1.5rem; margin-bottom: 1rem;">Live Monitoring</h3>
+            <p style="color: var(--text-muted); margin-bottom: 2rem;">Real-time face detection and identification with
+                high-performance tracking algorithms.</p>
+            <span style="color: var(--secondary); font-weight: 600;">Launch Scanner &rarr;</span>
+        </a>
+
+        <!-- Database Card -->
+        <a href="{% url 'gallery' %}" class="glass-card animate-fade-in"
+            style="padding: 3rem 2rem; text-decoration: none; text-align: center; transition: all 0.4s ease; animation-delay: 0.3s;">
+            <div
+                style="width: 80px; height: 80px; background: rgba(16, 185, 129, 0.1); border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 1.5rem; color: var(--success); font-size: 2rem;">
+                <i class="fa-solid fa-database"></i>
+            </div>
+            <h3 style="font-size: 1.5rem; margin-bottom: 1rem;">Data Management</h3>
+            <p style="color: var(--text-muted); margin-bottom: 2rem;">Comprehensive gallery to view, edit, and manage
+                all registered identities.</p>
+            <span style="color: var(--success); font-weight: 600;">View Gallery &rarr;</span>
+        </a>
+
+        <!-- Dashboard Card -->
+        <a href="{% url 'dashboard' %}" class="glass-card animate-fade-in"
+            style="padding: 3rem 2rem; text-decoration: none; text-align: center; transition: all 0.4s ease; animation-delay: 0.4s;">
+            <div
+                style="width: 80px; height: 80px; background: rgba(34, 211, 238, 0.1); border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 1.5rem; color: #22d3ee; font-size: 2rem;">
+                <i class="fa-solid fa-chart-line"></i>
+            </div>
+            <h3 style="font-size: 1.5rem; margin-bottom: 1rem;">Analytics Dashboard</h3>
+            <p style="color: var(--text-muted); margin-bottom: 2rem;">Interactive visualizations of attendance trends
+                and
+                security event metrics.</p>
+            <span style="color: #22d3ee; font-weight: 600;">Insights &rarr;</span>
+        </a>
+
+        <!-- CCTV Card -->
+        <a href="{% url 'cctv' %}" class="glass-card animate-fade-in"
+            style="padding: 3rem 2rem; text-decoration: none; text-align: center; transition: all 0.4s ease; animation-delay: 0.5s;">
+            <div
+                style="width: 80px; height: 80px; background: rgba(168, 85, 247, 0.1); border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 1.5rem; color: #a855f7; font-size: 2rem;">
+                <i class="fa-solid fa-video"></i>
+            </div>
+            <h3 style="font-size: 1.5rem; margin-bottom: 1rem;">CCTV View</h3>
+            <p style="color: var(--text-muted); margin-bottom: 2rem;">Clean horizontal dual-camera feed for traditional
+                monitoring without detection overlays.</p>
+            <span style="color: #a855f7; font-weight: 600;">Open CCTV &rarr;</span>
+        </a>
+
+        <!-- Report Card -->
+        <a href="{% url 'report' %}" class="glass-card animate-fade-in"
+            style="padding: 3rem 2rem; text-decoration: none; text-align: center; transition: all 0.4s ease; animation-delay: 0.6s;">
+            <div
+                style="width: 80px; height: 80px; background: rgba(248, 113, 113, 0.1); border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 1.5rem; color: #f87171; font-size: 2rem;">
+                <i class="fa-solid fa-triangle-exclamation"></i>
+            </div>
+            <h3 style="font-size: 1.5rem; margin-bottom: 1rem;">Bunk Reports</h3>
+            <p style="color: var(--text-muted); margin-bottom: 2rem;">Detailed logs of all missing and found alerts with
+                precise synchronized timestamps.</p>
+            <span style="color: #f87171; font-weight: 600;">View Logs &rarr;</span>
+        </a>
+
+    </div>
+
+    <!-- Stats Row -->
+    <div style="margin-top: 4rem; display: flex; justify-content: center; gap: 4rem; flex-wrap: wrap;">
+        <div style="text-align: center;">
+            <div style="font-size: 3rem; font-weight: 700; color: white;">{{ total_people }}</div>
+            <div
+                style="color: var(--text-muted); text-transform: uppercase; letter-spacing: 1px; font-size: 0.8rem; margin-top: 0.5rem;">
+                Registered Individuals</div>
+        </div>
+        <div style="width: 1px; background: var(--glass-border);"></div>
+        <div style="text-align: center;">
+            <div style="font-size: 3rem; font-weight: 700; color: white;">{{ total_images }}</div>
+            <div
+                style="color: var(--text-muted); text-transform: uppercase; letter-spacing: 1px; font-size: 0.8rem; margin-top: 0.5rem;">
+                Processed Images</div>
+        </div>
+        <div style="width: 1px; background: var(--glass-border);"></div>
+        <div style="text-align: center;">
+            <div style="font-size: 3rem; font-weight: 700; color: var(--success);">100%</div>
+            <div
+                style="color: var(--text-muted); text-transform: uppercase; letter-spacing: 1px; font-size: 0.8rem; margin-top: 0.5rem;">
+                System Status</div>
+        </div>
+    </div>
+</section>
+{% endblock %}
