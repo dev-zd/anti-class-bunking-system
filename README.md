@@ -1,75 +1,132 @@
-# Anti-Class Bunking System 🛡️
+# FaceRec Pro: Anti-Class Skipping System 🛡️
 
-A premium, real-time surveillance and attendance management system powered by Face Recognition and AI. Designed to monitor student presence across multiple locations (Classroom & Corridors) and alert authorities in case of unauthorized absence. (!!This is a completely a prototype model which uses 2 camera's which are laptop 'default camera' and an external webcamera to act as second camera!!)
+**FaceRec Pro** is a premium, real-time surveillance and attendance management system powered by Face Recognition and AI. It is designed to monitor student presence across multiple locations (e.g., Classroom & Corridors) and automatically alert authorities via email in case of unauthorized absence or "skipping".
 
-![Dashboard Preview](https://via.placeholder.com/800x400?text=Anti-Class+Bunking+System+Dashboard)
+> [!NOTE]
+> This is a functional prototype designed for dual-camera setups. It can utilize a laptop's default camera and an external USB webcam to simulate two distinct monitoring zones.
+
+---
 
 ## 🚀 Key Features
 
-### 🔍 Smart Detection & Recognition
-- **Face Recognition**: Real-time identification using `face_recognition` and `OpenCV`.
-- **AI-Powered Detection**: High-speed face localization using **YOLOv11**.
-- **Dual Camera Support**: Simultaneous monitoring of two zones (e.g., Camera 1 for Classroom, Camera 2 for Corridors).
+### 🔍 Advanced AI Detection
+- **YOLOv11 Integration**: High-speed, accurate face localization.
+- **Deep Face Recognition**: Real-time identification using specialized embeddings and distance matching.
+- **Dual Camera Architecture**: Simultaneous processing of "Classroom" (primary) and "Corridor" (secondary) feeds.
 
-### 🚨 Real-time Alerts
-- **Missing Person Detection**: Automatically detects if a target student leaves the classroom and enters the corridor.
-- **Email Notifications**: Instant email alerts sent to administrators when a student is flagged as "Missing".
-- **Dynamic Thresholding**: Configurable time limits for student movement.
+### 🔐 Secure Authentication
+- **Glassmorphic Auth**: Modern, high-end login and signup interfaces.
+- **Forgot Password with OTP**: Secure password recovery system using 6-digit email OTPs.
+- **Session Management**: Secure user sessions for administrative access.
 
-### 📺 CCTV Monitor Mode
-- **Clean Raw Feed**: Traditional monitor view without detection overlays.
-- **Dynamic Status**: Real-time "Active/Offline" status indicators for all hardware.
-- **Stability Engine**: Built-in recovery cooldowns and phantom feed prevention.
+### 🚨 Intelligent Alerts & Logging
+- **Missing Student Tracking**: Detects when a student who was present in class is missing for more than a configurable threshold.
+- **Automated Email Alerts**: Instant notifications sent to administrators with timestamps.
+- **Corridor Detection**: Logs when a "missing" student is spotted in the corridor.
+- **Automated Attendance**: Mark attendance automatically upon facial recognition.
 
-### 📊 Management Dashboard
-- **Glassmorphic UI**: Beautiful, modern administration panel with quick statistics.
-- **Attendance Logs**: Daily automated attendance marking.
-- **Detailed Reports**: Searchable logs for found and missing student events.
+### 📺 Management & Monitoring
+- **CCTV Monitor Mode**: A clean, raw dual-feed monitor for traditional security viewing.
+- **Management Dashboard**: Real-time statistics, attendance charts, and recent activity logs.
+- **Detailed Reports**: Comprehensive searchable logs of all attendance and alert events.
+
+---
+
+## 🏗️ System Architecture
+
+```mermaid
+graph TD
+    subgraph Input
+        C1[Camera 1: Classroom]
+        C2[Camera 2: Corridor]
+    end
+
+    subgraph "Processing Engine (Django + OpenCV)"
+        YOLO[YOLOv11 Detection]
+        REC[Face Recognition]
+        DAT[Database Matching]
+    end
+
+    subgraph "Actions & UI"
+        DSH[Web Dashboard]
+        LOG[Attendance Logs]
+        EML[Email Alerts]
+    end
+
+    C1 & C2 --> YOLO
+    YOLO --> REC
+    REC --> DAT
+    DAT --> DSH
+    DAT --> LOG
+    DAT --> EML
+```
+
+---
 
 ## 🛠️ Tech Stack
 
-- **Backend**: Python, Django
-- **Computer Vision**: OpenCV, Face Recognition Library
-- **AI/ML**: Ultralytics YOLOv11
-- **Frontend**: HTML5, Vanilla CSS (Glassmorphism), JavaScript
-- **Database**: SQLite (Development) / PostgreSQL (Production ready)
+- **Backend**: Python 3.x, [Django 4.2](https://www.djangoproject.com/)
+- **Computer Vision**: [OpenCV](https://opencv.org/), [Face Recognition](https://github.com/ageitgey/face_recognition)
+- **AI/ML**: [Ultralytics YOLOv11](https://github.com/ultralytics/ultralytics)
+- **Database**: MySQL (Production) / SQLite3 (Development)
+- **Frontend**: Glassmorphic UI (Vanilla CSS), JavaScript (Vanilla)
+
+---
 
 ## ⚙️ Installation & Setup
 
-1. **Clone the Repository**
-   ```bash
-   git clone https://github.com/dev-zd/anti-class-bunking-system.git
-   cd anti-class-bunking-system
-   ```
+### 1. Prerequisites
+- Python 3.8+
+- Webcam(s) connected to your system.
 
-2. **Install Dependencies**
-   ```bash
-   pip install -r requirements.txt
-   ```
+### 2. Clone the Repository
+```bash
+git clone https://github.com/dev69z/anti-class-skipping-system.git
+cd anti-class-skipping-system
+```
 
-3. **Configure Settings**
-   - Update `EMAIL_SENDER` and `EMAIL_PASSWORD` in `core/camera.py` for alerts.
-   - Run migrations:
-     ```bash
-     python manage.py migrate
-     ```
+### 3. Setup Virtual Environment (Recommended)
+```bash
+python -m venv venv
+# Windows:
+venv\Scripts\activate
+# Linux/Mac:
+source venv/bin/activate
+```
 
-4. **Run the Application**
-   ```bash
-   python manage.py runserver
-   ```
+### 4. Install Dependencies
+```bash
+pip install -r requirements.txt
+```
 
-## 📸 Usage Screenshots
+### 5. Configure Email Alerts
+Open `core/camera.py` and update the following configuration:
+```python
+EMAIL_SENDER = "your-email@gmail.com"
+EMAIL_PASSWORD = "your-app-password"
+EMAIL_RECEIVER = "admin-email@gmail.com"
+```
 
-> [!TIP]
-> Add your own screenshots from the `walkthrough.md` to this section once you have them!
+### 6. Run Migrations & Start Server
+```bash
+python manage.py makemigrations
+python manage.py migrate
+python manage.py runserver
+```
 
-- **Dashboard**: High-level overview of presence and alerts.
-- **Live Analysis**: Real-time face identifying and bounding boxes.
-- **CCTV Monitor**: Raw dual-camera feed for traditional security.
-
-## 📄 License
-This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
+Access the application at `http://127.0.0.1:8000/`.
 
 ---
-Developed with ❤️ by [dev-zd](https://github.com/dev-zd)
+
+## 📸 Screenshots
+
+| Login Page | Forgot Password |
+| :---: | :---: |
+| ![Login](file:///C:/Users/devkr/.gemini/antigravity/brain/82f1f80a-c4e4-4ca4-92a5-7556ab9ff2fa/uploaded_image_1769007939538.png) | ![](file:///C:/Users/devkr/.gemini/antigravity/brain/82f1f80a-c4e4-4ca4-92a5-7556ab9ff2fa/.system_generated/click_feedback/click_feedback_1769009102392.png) |
+
+---
+
+## 📄 License
+This project is licensed under the MIT License.
+
+Developed with ❤️ for Advanced Surveillance Technology.
