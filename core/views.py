@@ -11,8 +11,12 @@ import time
 from django.utils import timezone
 from datetime import timedelta
 from django.db.models import Q
-from .models import Attendance, MissingLog
+from .models import Attendance, MissingLog, PasswordResetOTP
 import os
+import random
+import smtplib
+from email.mime.text import MIMEText
+from email.mime.multipart import MIMEMultipart
 import shutil
 from django.conf import settings
 import os
@@ -413,6 +417,106 @@ def signup_view(request):
             return redirect('login')
             
     return render(request, 'core/signup.html')
+
+def send_otp_email(user, otp):
+    # Reuse credentials from camera.py or common config
+    # For now, hardcoding based on camera.py as requested
+    EMAIL_SENDER = "victusho182@gmail.com"
+    EMAIL_PASSWORD = "lajd qmor mgrk oztt"
+    
+    subject = "FaceRec Pro - Password Reset OTP"
+    body = f"Hello {user.username},\n\nYour OTP for password reset is: {otp}\n\nThis OTP is valid for 10 minutes.\n\nIf you did not request this, please ignore this email."
+    
+    msg = MIMEMultipart()
+    msg['From'] = EMAIL_SENDER
+    msg['To'] = user.email
+    msg['Subject'] = subject
+    msg.attach(MIMEText(body, 'plain'))
+    
+    try:
+        server = smtplib.SMTP('smtp.gmail.com', 587)
+        server.starttls()
+        server.login(EMAIL_SENDER, EMAIL_PASSWORD)
+        server.sendmail(EMAIL_SENDER, user.email, msg.as_string())
+        server.quit()
+        return True
+    except Exception as e:
+        print(f"Error sending OTP: {e}")
+        return False
+
+def forgot_password_view(request):
+    if request.method == 'POST':
+        identifier = request.POST.get('user_identifier')
+        user = User.objects.filter(Q(username=identifier) | Q(email=identifier)).first()
+        
+        if user:
+            if not user.email:
+                messages.error(request, "This user does not have an email address associated.")
+                return redirect('forgot_password')
+                
+            otp = str(random.randint(100000, 999999))
+            # Delete old OTPs for this user
+            PasswordResetOTP.objects.filter(user=user).delete()
+            PasswordResetOTP.objects.create(user=user, otp=otp)
+            
+            if send_otp_email(user, otp):
+                request.session['reset_user_id'] = user.id
+                messages.success(request, f"OTP has been sent to {user.email}")
+                return redirect('verify_otp')
+            else:
+                messages.error(request, "Failed to send email. Please try again later.")
+        else:
+            messages.error(request, "User not found.")
+            
+    return render(request, 'core/forgot_password.html')
+
+def verify_otp_view(request):
+    user_id = request.session.get('reset_user_id')
+    if not user_id:
+        return redirect('forgot_password')
+        
+    if request.method == 'POST':
+        otp_entered = request.POST.get('otp')
+        otp_obj = PasswordResetOTP.objects.filter(user_id=user_id, otp=otp_entered).first()
+        
+        if otp_obj:
+            if otp_obj.is_expired():
+                messages.error(request, "OTP has expired. Please request a new one.")
+                return redirect('forgot_password')
+            
+            request.session['otp_verified'] = True
+            return redirect('reset_password')
+        else:
+            messages.error(request, "Invalid OTP.")
+            
+    return render(request, 'core/verify_otp.html')
+
+def reset_password_view(request):
+    user_id = request.session.get('reset_user_id')
+    otp_verified = request.session.get('otp_verified')
+    
+    if not user_id or not otp_verified:
+        return redirect('forgot_password')
+        
+    if request.method == 'POST':
+        pass1 = request.POST.get('pass1')
+        pass2 = request.POST.get('pass2')
+        
+        if pass1 != pass2:
+            messages.error(request, "Passwords do not match.")
+        else:
+            user = User.objects.get(id=user_id)
+            user.set_password(pass1)
+            user.save()
+            # Clean up
+            PasswordResetOTP.objects.filter(user=user).delete()
+            del request.session['reset_user_id']
+            del request.session['otp_verified']
+            
+            messages.success(request, "Password reset successful. Please log in.")
+            return redirect('login')
+            
+    return render(request, 'core/reset_password.html')
 
 from django.db.models import Q
 from .models import Attendance, MissingLog

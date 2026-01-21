@@ -76,3 +76,15 @@ class MissingLog(models.Model):
 
     def __str__(self):
         return f"{self.name} - {self.status} in {self.location} at {self.timestamp}"
+
+class PasswordResetOTP(models.Model):
+    user = models.ForeignKey('auth.User', on_delete=models.CASCADE)
+    otp = models.CharField(max_length=6)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    def is_expired(self):
+        # OTP valid for 10 minutes
+        return timezone.now() > self.created_at + timezone.timedelta(minutes=10)
+
+    def __str__(self):
+        return f"{self.user.username} - {self.otp}"
