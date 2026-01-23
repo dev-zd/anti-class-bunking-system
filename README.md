@@ -1,7 +1,5 @@
 # FaceRec Pro: Anti-Class Skipping System 🛡️
 
-![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)
-
 **FaceRec Pro** is a premium, real-time surveillance and attendance management system powered by Face Recognition and AI. It is designed to monitor student presence across multiple locations (e.g., Classroom & Corridors) and automatically alert authorities via email in case of unauthorized absence or "skipping".
 
 > [!NOTE]
